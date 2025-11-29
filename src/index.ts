@@ -40,6 +40,8 @@ const DEFAULT_IGNORE_VARIABLES = [
   'OLDPWD',
   'SHLVL',
   '_',
+  'INIT_CWD',
+  'NODE',
 ];
 
 /**
