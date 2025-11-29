@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, beforeEach, afterEach, mock } from 'node:test';
+import assert from 'node:assert';
 import {
   warnUnused,
   DEFAULT_IGNORE_PREFIXES,
   DEFAULT_IGNORE_VARIABLES,
-} from './index';
+} from './index.ts';
 
 describe('warnUnused', () => {
   const originalEnv = process.env;
@@ -22,7 +23,7 @@ describe('warnUnused', () => {
 
     const result = warnUnused(cleanedEnv, { warn: () => {} });
 
-    expect(result).toEqual([]);
+    assert.deepStrictEqual(result, []);
   });
 
   it('returns unused env vars not in schema', () => {
@@ -35,7 +36,7 @@ describe('warnUnused', () => {
       ignoreVariables: [],
     });
 
-    expect(result).toEqual(['UNUSED_VAR']);
+    assert.deepStrictEqual(result, ['UNUSED_VAR']);
   });
 
   it('returns multiple unused env vars', () => {
@@ -48,7 +49,7 @@ describe('warnUnused', () => {
       ignoreVariables: [],
     });
 
-    expect(result).toEqual(['UNUSED1', 'UNUSED2']);
+    assert.deepStrictEqual(result, ['UNUSED1', 'UNUSED2']);
   });
 
   describe('ignoreVariables', () => {
@@ -62,7 +63,7 @@ describe('warnUnused', () => {
         ignoreVariables: ['IGNORED_VAR'],
       });
 
-      expect(result).toEqual(['ANOTHER']);
+      assert.deepStrictEqual(result, ['ANOTHER']);
     });
 
     it('ignores multiple exact variable names', () => {
@@ -75,7 +76,7 @@ describe('warnUnused', () => {
         ignoreVariables: ['IGNORED1', 'IGNORED2'],
       });
 
-      expect(result).toEqual(['UNUSED']);
+      assert.deepStrictEqual(result, ['UNUSED']);
     });
 
     it('uses DEFAULT_IGNORE_VARIABLES when ignoreVariables not specified', () => {
@@ -87,8 +88,8 @@ describe('warnUnused', () => {
         ignorePrefixes: [],
       });
 
-      expect(result).toEqual(['CUSTOM_VAR']);
-      expect(result).not.toContain('SHELL');
+      assert.deepStrictEqual(result, ['CUSTOM_VAR']);
+      assert.ok(!result.includes('SHELL'));
     });
   });
 
@@ -103,7 +104,7 @@ describe('warnUnused', () => {
         ignoreVariables: [],
       });
 
-      expect(result).toEqual(['ANOTHER']);
+      assert.deepStrictEqual(result, ['ANOTHER']);
     });
 
     it('ignores vars matching multiple prefixes', () => {
@@ -121,7 +122,7 @@ describe('warnUnused', () => {
         ignoreVariables: [],
       });
 
-      expect(result).toEqual(['UNUSED']);
+      assert.deepStrictEqual(result, ['UNUSED']);
     });
 
     it('uses DEFAULT_IGNORE_PREFIXES when ignorePrefixes not specified', () => {
@@ -133,8 +134,8 @@ describe('warnUnused', () => {
         ignoreVariables: [],
       });
 
-      expect(result).toEqual(['CUSTOM_VAR']);
-      expect(result).not.toContain('npm_config_test');
+      assert.deepStrictEqual(result, ['CUSTOM_VAR']);
+      assert.ok(!result.includes('npm_config_test'));
     });
   });
 
@@ -142,7 +143,7 @@ describe('warnUnused', () => {
     it('calls warn function with message when unused vars found', () => {
       process.env = { FOO: 'bar', UNUSED: 'value' };
       const cleanedEnv = { FOO: 'bar' };
-      const warnFn = vi.fn();
+      const warnFn = mock.fn();
 
       warnUnused(cleanedEnv, {
         warn: warnFn,
@@ -150,8 +151,9 @@ describe('warnUnused', () => {
         ignoreVariables: [],
       });
 
-      expect(warnFn).toHaveBeenCalledTimes(1);
-      expect(warnFn).toHaveBeenCalledWith(
+      assert.strictEqual(warnFn.mock.callCount(), 1);
+      assert.strictEqual(
+        warnFn.mock.calls[0].arguments[0],
         '[envalid-unused] Found 1 unused environment variable(s): UNUSED'
       );
     });
@@ -159,7 +161,7 @@ describe('warnUnused', () => {
     it('does not call warn when no unused vars', () => {
       process.env = { FOO: 'bar' };
       const cleanedEnv = { FOO: 'bar' };
-      const warnFn = vi.fn();
+      const warnFn = mock.fn();
 
       warnUnused(cleanedEnv, {
         warn: warnFn,
@@ -167,27 +169,32 @@ describe('warnUnused', () => {
         ignoreVariables: [],
       });
 
-      expect(warnFn).not.toHaveBeenCalled();
+      assert.strictEqual(warnFn.mock.callCount(), 0);
     });
 
     it('uses console.warn by default', () => {
       process.env = { UNUSED: 'value' };
       const cleanedEnv = {};
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const originalWarn = console.warn;
+      const consoleSpy = mock.fn();
+      console.warn = consoleSpy;
 
-      warnUnused(cleanedEnv, {
-        ignorePrefixes: [],
-        ignoreVariables: [],
-      });
+      try {
+        warnUnused(cleanedEnv, {
+          ignorePrefixes: [],
+          ignoreVariables: [],
+        });
 
-      expect(consoleSpy).toHaveBeenCalledTimes(1);
-      consoleSpy.mockRestore();
+        assert.strictEqual(consoleSpy.mock.callCount(), 1);
+      } finally {
+        console.warn = originalWarn;
+      }
     });
 
     it('includes count and list of unused vars in message', () => {
       process.env = { UNUSED1: 'a', UNUSED2: 'b', UNUSED3: 'c' };
       const cleanedEnv = {};
-      const warnFn = vi.fn();
+      const warnFn = mock.fn();
 
       warnUnused(cleanedEnv, {
         warn: warnFn,
@@ -195,7 +202,8 @@ describe('warnUnused', () => {
         ignoreVariables: [],
       });
 
-      expect(warnFn).toHaveBeenCalledWith(
+      assert.strictEqual(
+        warnFn.mock.calls[0].arguments[0],
         '[envalid-unused] Found 3 unused environment variable(s): UNUSED1, UNUSED2, UNUSED3'
       );
     });
@@ -210,46 +218,46 @@ describe('warnUnused', () => {
         CUSTOM_UNUSED: 'y',
       };
       const cleanedEnv = { DEFINED: 'value' };
-      const warnFn = vi.fn();
+      const warnFn = mock.fn();
 
       const result = warnUnused(cleanedEnv, { warn: warnFn });
 
-      expect(result).toEqual(['CUSTOM_UNUSED']);
+      assert.deepStrictEqual(result, ['CUSTOM_UNUSED']);
     });
   });
 });
 
 describe('DEFAULT_IGNORE_PREFIXES', () => {
   it('contains expected prefixes', () => {
-    expect(DEFAULT_IGNORE_PREFIXES).toContain('npm_');
-    expect(DEFAULT_IGNORE_PREFIXES).toContain('NODE_');
-    expect(DEFAULT_IGNORE_PREFIXES).toContain('LC_');
-    expect(DEFAULT_IGNORE_PREFIXES).toContain('SSH_');
-    expect(DEFAULT_IGNORE_PREFIXES).toContain('XDG_');
-    expect(DEFAULT_IGNORE_PREFIXES).toContain('DBUS_');
+    assert.ok(DEFAULT_IGNORE_PREFIXES.includes('npm_'));
+    assert.ok(DEFAULT_IGNORE_PREFIXES.includes('NODE_'));
+    assert.ok(DEFAULT_IGNORE_PREFIXES.includes('LC_'));
+    assert.ok(DEFAULT_IGNORE_PREFIXES.includes('SSH_'));
+    assert.ok(DEFAULT_IGNORE_PREFIXES.includes('XDG_'));
+    assert.ok(DEFAULT_IGNORE_PREFIXES.includes('DBUS_'));
   });
 
   it('only contains prefixes (ending with underscore)', () => {
     for (const prefix of DEFAULT_IGNORE_PREFIXES) {
-      expect(prefix.endsWith('_')).toBe(true);
+      assert.ok(prefix.endsWith('_'), `${prefix} should end with underscore`);
     }
   });
 });
 
 describe('DEFAULT_IGNORE_VARIABLES', () => {
   it('contains expected variables', () => {
-    expect(DEFAULT_IGNORE_VARIABLES).toContain('SHELL');
-    expect(DEFAULT_IGNORE_VARIABLES).toContain('TERM');
-    expect(DEFAULT_IGNORE_VARIABLES).toContain('USER');
-    expect(DEFAULT_IGNORE_VARIABLES).toContain('HOME');
-    expect(DEFAULT_IGNORE_VARIABLES).toContain('PATH');
-    expect(DEFAULT_IGNORE_VARIABLES).toContain('PWD');
+    assert.ok(DEFAULT_IGNORE_VARIABLES.includes('SHELL'));
+    assert.ok(DEFAULT_IGNORE_VARIABLES.includes('TERM'));
+    assert.ok(DEFAULT_IGNORE_VARIABLES.includes('USER'));
+    assert.ok(DEFAULT_IGNORE_VARIABLES.includes('HOME'));
+    assert.ok(DEFAULT_IGNORE_VARIABLES.includes('PATH'));
+    assert.ok(DEFAULT_IGNORE_VARIABLES.includes('PWD'));
   });
 
   it('does not contain prefixes (items ending with underscore)', () => {
     const prefixLike = DEFAULT_IGNORE_VARIABLES.filter(
       (v) => v.endsWith('_') && v !== '_'
     );
-    expect(prefixLike).toEqual([]);
+    assert.deepStrictEqual(prefixLike, []);
   });
 });

@@ -2,15 +2,20 @@
   "name": "envalid-unused",
   "version": "1.0.0",
   "description": "Detect unused environment variables by comparing process.env with envalid's cleanEnv result",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
   "files": [
     "dist"
   ],
   "scripts": {
     "build": "tsc",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "node --test --experimental-strip-types src/**/*.test.ts",
+    "test:watch": "node --test --watch --experimental-strip-types src/**/*.test.ts",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -28,10 +33,9 @@
     "envalid": ">=7.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
+    "@types/node": "^22.0.0",
     "envalid": "^8.0.0",
-    "typescript": "^5.3.0",
-    "vitest": "^4.0.14"
+    "typescript": "^5.3.0"
   },
   "packageManager": "pnpm@10.22.0"
 }
