@@ -1,0 +1,37 @@
+{
+  "name": "envalid-unused",
+  "version": "1.0.0",
+  "description": "Detect unused environment variables by comparing process.env with envalid's cleanEnv result",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "envalid",
+    "env",
+    "environment",
+    "variables",
+    "unused",
+    "lint",
+    "validation"
+  ],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "envalid": ">=7.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "envalid": "^8.0.0",
+    "typescript": "^5.3.0",
+    "vitest": "^4.0.14"
+  },
+  "packageManager": "pnpm@10.22.0"
+}
