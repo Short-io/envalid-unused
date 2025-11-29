@@ -1,6 +1,6 @@
 {
   "name": "envalid-unused",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Detect unused environment variables by comparing process.env with envalid's cleanEnv result",
   "type": "module",
   "exports": {

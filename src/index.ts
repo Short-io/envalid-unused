@@ -14,6 +14,10 @@ const DEFAULT_IGNORE_PREFIXES = [
   'SSH_',
   'XDG_',
   'DBUS_',
+  'PNPM_',
+  'pnpm_',
+  'YARN_',
+  'COREPACK_',
 ];
 
 const DEFAULT_IGNORE_VARIABLES = [
