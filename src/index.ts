@@ -8,19 +8,35 @@ export interface WarnUnusedOptions {
 }
 
 const DEFAULT_IGNORE_PREFIXES = [
+  // Node.js / package managers
   'npm_',
   'NODE_',
-  'LC_',
-  'SSH_',
-  'XDG_',
-  'DBUS_',
   'PNPM_',
   'pnpm_',
   'YARN_',
   'COREPACK_',
+  // Shell / OS
+  'LC_',
+  'SSH_',
+  'XDG_',
+  'DBUS_',
+  'MEMORY_PRESSURE_',
+  // GitHub Actions runner
+  'GITHUB_',
+  'RUNNER_',
+  'ACTIONS_',
+  // Toolchains preinstalled on CI runner images
+  'ANDROID_',
+  'DOTNET_',
+  'GOROOT_',
+  'JAVA_HOME_',
+  'HOMEBREW_',
+  'PIPX_',
+  'NX_',
 ];
 
 const DEFAULT_IGNORE_VARIABLES = [
+  // Shell / OS
   'SHELL',
   'TERM',
   'USER',
@@ -40,8 +56,43 @@ const DEFAULT_IGNORE_VARIABLES = [
   'OLDPWD',
   'SHLVL',
   '_',
+  'TZ',
+  // systemd (present when the process is started by a unit, incl. CI runners)
+  'INVOCATION_ID',
+  'JOURNAL_STREAM',
+  'SYSTEMD_EXEC_PID',
+  // Node.js / package managers
   'INIT_CWD',
   'NODE',
+  // CI
+  'CI',
+  'FORCE_COLOR',
+  'ImageOS',
+  'ImageVersion',
+  'AGENT_TOOLSDIRECTORY',
+  'DEBIAN_FRONTEND',
+  'ACCEPT_EULA',
+  // Toolchains preinstalled on CI runner images
+  'JAVA_HOME',
+  'GRADLE_HOME',
+  'ANT_HOME',
+  'CONDA',
+  'NVM_DIR',
+  'SWIFT_PATH',
+  'VCPKG_INSTALLATION_ROOT',
+  'AZURE_EXTENSION_DIR',
+  'POWERSHELL_DISTRIBUTION_CHANNEL',
+  'PSModulePath',
+  'BOOTSTRAP_HASKELL_NONINTERACTIVE',
+  'GHCUP_INSTALL_BASE_PREFIX',
+  'USE_BAZEL_FALLBACK_VERSION',
+  'SGX_AESM_ADDR',
+  // Browsers / drivers preinstalled on CI runner images
+  'CHROME_BIN',
+  'CHROMEWEBDRIVER',
+  'GECKOWEBDRIVER',
+  'EDGEWEBDRIVER',
+  'SELENIUM_JAR_PATH',
 ];
 
 /**
