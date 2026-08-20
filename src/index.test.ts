@@ -261,3 +261,143 @@ describe('DEFAULT_IGNORE_VARIABLES', () => {
     assert.deepStrictEqual(prefixLike, []);
   });
 });
+
+describe('GitHub Actions environment', () => {
+  const originalEnv = process.env;
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  // Sampled from a real ubuntu-latest GitHub-hosted runner
+  const RUNNER_VARS = [
+    'GITHUB_STATE',
+    'GITHUB_ENV',
+    'GITHUB_PATH',
+    'GITHUB_OUTPUT',
+    'GITHUB_STEP_SUMMARY',
+    'GITHUB_EVENT_PATH',
+    'GITHUB_WORKFLOW',
+    'GITHUB_WORKFLOW_REF',
+    'GITHUB_WORKFLOW_SHA',
+    'GITHUB_ACTION',
+    'GITHUB_ACTION_REF',
+    'GITHUB_ACTION_REPOSITORY',
+    'GITHUB_ACTIONS',
+    'GITHUB_ACTOR',
+    'GITHUB_ACTOR_ID',
+    'GITHUB_TRIGGERING_ACTOR',
+    'GITHUB_API_URL',
+    'GITHUB_GRAPHQL_URL',
+    'GITHUB_SERVER_URL',
+    'GITHUB_BASE_REF',
+    'GITHUB_HEAD_REF',
+    'GITHUB_REF',
+    'GITHUB_REF_NAME',
+    'GITHUB_REF_PROTECTED',
+    'GITHUB_REF_TYPE',
+    'GITHUB_SHA',
+    'GITHUB_JOB',
+    'GITHUB_RUN_ID',
+    'GITHUB_RUN_NUMBER',
+    'GITHUB_RUN_ATTEMPT',
+    'GITHUB_RETENTION_DAYS',
+    'GITHUB_REPOSITORY',
+    'GITHUB_REPOSITORY_ID',
+    'GITHUB_REPOSITORY_OWNER',
+    'GITHUB_REPOSITORY_OWNER_ID',
+    'GITHUB_WORKSPACE',
+    'GITHUB_EVENT_NAME',
+    'GITHUB_ARTIFACTS',
+    'GITHUB_ARTIFACTS_LIST',
+    'RUNNER_OS',
+    'RUNNER_ARCH',
+    'RUNNER_NAME',
+    'RUNNER_TEMP',
+    'RUNNER_TOOL_CACHE',
+    'RUNNER_TRACKING_ID',
+    'RUNNER_WORKSPACE',
+    'RUNNER_ENVIRONMENT',
+    'ACTIONS_ORCHESTRATION_ID',
+    'ACTIONS_RUNNER_ACTION_ARCHIVE_CACHE',
+    'CI',
+    'FORCE_COLOR',
+    'ImageOS',
+    'ImageVersion',
+    'AGENT_TOOLSDIRECTORY',
+    'DEBIAN_FRONTEND',
+    'ACCEPT_EULA',
+    'TZ',
+    'INVOCATION_ID',
+    'JOURNAL_STREAM',
+    'SYSTEMD_EXEC_PID',
+    'MEMORY_PRESSURE_WATCH',
+    'MEMORY_PRESSURE_WRITE',
+    'JAVA_HOME',
+    'JAVA_HOME_8_X64',
+    'JAVA_HOME_11_X64',
+    'JAVA_HOME_17_X64',
+    'JAVA_HOME_21_X64',
+    'JAVA_HOME_25_X64',
+    'GRADLE_HOME',
+    'ANT_HOME',
+    'CONDA',
+    'NVM_DIR',
+    'SWIFT_PATH',
+    'GOROOT_1_24_X64',
+    'GOROOT_1_25_X64',
+    'GOROOT_1_26_X64',
+    'DOTNET_NOLOGO',
+    'DOTNET_SKIP_FIRST_TIME_EXPERIENCE',
+    'DOTNET_MULTILEVEL_LOOKUP',
+    'ANDROID_HOME',
+    'ANDROID_NDK',
+    'ANDROID_NDK_HOME',
+    'ANDROID_NDK_ROOT',
+    'ANDROID_NDK_LATEST_HOME',
+    'ANDROID_SDK_ROOT',
+    'HOMEBREW_NO_AUTO_UPDATE',
+    'HOMEBREW_CLEANUP_PERIODIC_FULL_DAYS',
+    'PIPX_HOME',
+    'PIPX_BIN_DIR',
+    'VCPKG_INSTALLATION_ROOT',
+    'AZURE_EXTENSION_DIR',
+    'POWERSHELL_DISTRIBUTION_CHANNEL',
+    'PSModulePath',
+    'BOOTSTRAP_HASKELL_NONINTERACTIVE',
+    'GHCUP_INSTALL_BASE_PREFIX',
+    'USE_BAZEL_FALLBACK_VERSION',
+    'SGX_AESM_ADDR',
+    'CHROME_BIN',
+    'CHROMEWEBDRIVER',
+    'GECKOWEBDRIVER',
+    'EDGEWEBDRIVER',
+    'SELENIUM_JAR_PATH',
+    'NX_WORKSPACE_ROOT',
+    'NX_TASK_HASH',
+    'NX_CLI_SET',
+  ];
+
+  it('ignores the variables a GitHub-hosted runner injects', () => {
+    process.env = Object.fromEntries(RUNNER_VARS.map((key) => [key, 'x']));
+    const cleanedEnv = {};
+
+    const result = warnUnused(cleanedEnv, { warn: () => {} });
+
+    assert.deepStrictEqual(result, []);
+  });
+
+  it('still reports application variables set alongside runner variables', () => {
+    process.env = {
+      ...Object.fromEntries(RUNNER_VARS.map((key) => [key, 'x'])),
+      API_URL: 'https://example.com',
+      STRIPE_KEY: 'sk_test',
+      AWS_SECRET_ACCESS_KEY: 'secret',
+    };
+    const cleanedEnv = { API_URL: 'https://example.com' };
+
+    const result = warnUnused(cleanedEnv, { warn: () => {} });
+
+    assert.deepStrictEqual(result, ['STRIPE_KEY', 'AWS_SECRET_ACCESS_KEY']);
+  });
+});
