@@ -29,7 +29,3 @@ Key design points that aren't obvious from the signature:
 - Invariant enforced by tests: every entry in `DEFAULT_IGNORE_PREFIXES` ends with `_`, and no entry in `DEFAULT_IGNORE_VARIABLES` does (except the literal `_`). Respect this when adding entries — a prefix in the wrong list silently stops matching.
 - `envalid` is a peer dependency only and is never imported by the library; the coupling is purely "the shape returned by `cleanEnv`" (`T extends object`).
 - `tsconfig.json` excludes `**/*.test.ts` from the build, and `package.json` ships only `dist`.
-
-## Known issue
-
-- `.github/workflows/npm-publish.yml` runs `npm ci` on Node 20. There is no `package-lock.json` (pnpm repo), and Node 20 lacks `--experimental-strip-types`, so both CI jobs fail as written. Publishing is triggered by a GitHub release.
